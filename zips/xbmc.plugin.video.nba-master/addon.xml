@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.nba"
+<addon id="xbmc.plugin.video.nba"
        name="NBA League Pass"
        version="1.0.2"
        provider-name="maxgalbu, ptsampoukas, robla, kokan, stevmert">

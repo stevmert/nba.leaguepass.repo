@@ -20,7 +20,7 @@
     </extension>
 </addon>
 
-<addon id="plugin.video.nba"
+<addon id="xbmc.plugin.video.nba"
        name="NBA League Pass"
        version="1.0.2"
        provider-name="maxgalbu, ptsampoukas, robla, kokan, stevmert">
