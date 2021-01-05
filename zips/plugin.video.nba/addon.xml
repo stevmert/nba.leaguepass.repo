@@ -2,7 +2,7 @@
 <addon id="plugin.video.nba"
        name="NBA League Pass II (kokan)"
        version="1.0.2"
-       provider-name="ivankokan, ptsampoukas, robla">
+       provider-name="ivankokan, maxgalbu, ptsampoukas, robla">
   <requires>
     <import addon="xbmc.python" version="2.20.0"/>
     <import addon="script.common.plugin.cache" version="0.9.1"/>
