@@ -1,0 +1,206 @@
+# Kodi Media Center language file
+# Addon Name: Skin Widgets
+# Addon id: service.skin.widgets
+# Addon Provider: Martijn|phil65
+msgid ""
+msgstr ""
+"Project-Id-Version: NBA League pass\n"
+"Report-Msgid-Bugs-To: max.galbusera@gmail.com\n"
+"Last-Translator: maxgalbu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#50000"
+msgid "Main settings"
+msgstr ""
+
+msgctxt "#50001"
+msgid "E-mail"
+msgstr ""
+
+msgctxt "#50002"
+msgid "Password"
+msgstr ""
+
+msgctxt "#50004"
+msgid "Show records and scores"
+msgstr ""
+
+msgctxt "#50005"
+msgid "Debug"
+msgstr ""
+
+msgctxt "#50007"
+msgid "Show Live games in local timezone"
+msgstr ""
+
+msgctxt "#50008"
+msgid "next page..."
+msgstr ""
+
+msgctxt "#50009"
+msgid "Favorite team"
+msgstr ""
+
+msgctxt "#50010"
+msgid "Use cached thumbnails"
+msgstr ""
+
+msgctxt "#50011"
+msgid "Show additional camera feeds"
+msgstr ""
+
+msgctxt "#50012"
+msgid "Show alternative archive menu"
+msgstr ""
+
+msgctxt "#50020"
+msgid "Failed to get a video URL. Are you logged in?"
+msgstr ""
+
+msgctxt "#50021"
+msgid "Cannot login: invalid e-mail and password, or your account is locked."
+msgstr ""
+
+msgctxt "#50022"
+msgid "Failed to login (response != 200)"
+msgstr ""
+
+msgctxt "#50023"
+msgid "Failed to get video URL (response != 200)"
+msgstr ""
+
+msgctxt "#50024"
+msgid "Please fill E-mail and Password in the addon's settings menu"
+msgstr ""
+
+msgctxt "#50130"
+msgid "Playlist generator settings"
+msgstr ""
+
+msgctxt "#50131"
+msgid "Enable playlists (requires alternative archive menu)"
+msgstr ""
+
+msgctxt "#50100"
+msgid "Hawks preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50101"
+msgid "Celtics preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50102"
+msgid "Nets preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50103"
+msgid "Hornets preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50104"
+msgid "Bulls preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50105"
+msgid "Cavaliers preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50106"
+msgid "Mavericks preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50107"
+msgid "Nuggets preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50108"
+msgid "Pistons preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50109"
+msgid "Warriors preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50110"
+msgid "Rockets preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50111"
+msgid "Pacers preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50112"
+msgid "Clippers preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50113"
+msgid "Lakers preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50114"
+msgid "Grizzlies preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50115"
+msgid "Heat preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50116"
+msgid "Bucks preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50117"
+msgid "Timberwolves preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50118"
+msgid "Pelicans preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50119"
+msgid "Knicks preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50120"
+msgid "Thunder preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50121"
+msgid "Magic preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50122"
+msgid "76ers preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50123"
+msgid "Suns preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50124"
+msgid "Trail Blazers preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50125"
+msgid "Kings preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50126"
+msgid "Spurs preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50127"
+msgid "Raptors preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50128"
+msgid "Jazz preference in playlist generation (0-3, higher is more)"
+msgstr ""
+
+msgctxt "#50129"
+msgid "Wizards preference in playlist generation (0-3, higher is more)"
+msgstr ""
