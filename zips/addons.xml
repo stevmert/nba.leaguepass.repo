@@ -88,7 +88,7 @@
 
 <addon id="video.nba.leaguepass.sm"
        name="NBA League Pass II"
-       version="1.0.4"
+       version="1.0.5"
        provider-name="ivankokan, stevmert, maxgalbu, ptsampoukas, robla">
   <requires>
     <import addon="xbmc.python" version="2.20.0"/>
