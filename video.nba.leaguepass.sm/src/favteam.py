@@ -1,6 +1,4 @@
-
-
-import json, urllib2
+import json
 import datetime, time
 from datetime import timedelta
 import xbmc, xbmcgui
@@ -10,6 +8,10 @@ import calendar
 from utils import *
 from common import *
 import vars
+try:
+    import urllib.request  as urllib2
+except ImportError:
+    import urllib2
 
 
 def addFavTeamGameLinks(fromDate, favTeamAbbrs, video_type='archive'):
@@ -122,7 +124,7 @@ def addFavTeamGameLinks(fromDate, favTeamAbbrs, video_type='archive'):
         if unknown_teams:
             log("Unknown teams: %s" % str(unknown_teams), xbmc.LOGWARNING)
 
-    except Exception, e:
+    except Exception as e:
         xbmc.executebuiltin('Notification(NBA League Pass,'+str(e)+',5000,)')
         log(traceback.format_exc(), xbmc.LOGDEBUG)
         pass

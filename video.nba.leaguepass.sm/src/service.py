@@ -1,17 +1,20 @@
-
-
 from tv import TV
 
-import xbmc, xbmcaddon
-import time, urllib, os, sys
-from urlparse import urlparse, parse_qs
-
+import xbmc, xbmcaddon, xbmcvfs
+import time, os, sys
+try:
+    from urllib.parse import unquote
+    from urllib.parse import urlparse
+    from urllib.parse import parse_qs
+except ImportError:
+    from urllib import unquote
+    from urlparse import urlparse, parse_qs
 import vars
 
 
 # Add src/service in load paths
 my_addon = xbmcaddon.Addon(vars.__addon_id__)
-addon_dir = xbmc.translatePath(my_addon.getAddonInfo('path')).decode('utf-8')
+addon_dir = xbmcvfs.translatePath(my_addon.getAddonInfo('path'))
 sys.path.append(os.path.join(addon_dir, 'src', 'service'))
 
 import utils
@@ -52,7 +55,7 @@ class PollingThread(BaseThread):
         # Get the hdnea param, where the "expires" param is
         hdnea_params = query_params.get("hdnea")[0]
         hdnea_params = hdnea_params.replace('~', '&')
-        hdnea_params = urllib.unquote(hdnea_params)
+        hdnea_params = unquote(hdnea_params)
 
         self.expires = parse_qs(hdnea_params).get("expires", 0)[0]
         self.expires = int(self.expires)

@@ -1,8 +1,5 @@
-
-
 from datetime import date
 from datetime import timedelta
-import urllib
 import xbmc, xbmcplugin, xbmcgui, xbmcaddon
 import sys
 
@@ -14,7 +11,10 @@ from favteam import *
 import vars
 
 from tv import TV
-
+try:
+    from urllib.parse import unquote_plus
+except ImportError:
+    from urllib import unquote_plus
 
 def mainMenu():
     addListItem('Live games', 'live', 'live', '', isfolder=True)
@@ -25,19 +25,15 @@ def mainMenu():
 
 def archiveMenu():
     if vars.use_alternative_archive_menu:
-        addListItem('Last 4-10 days', 'archive', 'last4-10days', '', isfolder=True)
         addListItem('This week (last 1-7 days)', 'archive', 'thisweek', '', isfolder=True)
+        addListItem('Last 4-10 days', 'archive', 'last4-10days', '', isfolder=True)
         addListItem('Last 2 weeks (last 8-14 days)', 'archive', 'last2weeks', '', isfolder=True)
         addListItem('Last 3 weeks (last 15-21 days)', 'archive', 'last3weeks', '', isfolder=True)
         if vars.enable_playlists:
-            addListItem('Create playlist of last 4-10 days', 'archive', 'playlist4-10', '', isfolder=True)
-            addListItem('Create playlist of last 4-10 days HURRY!', 'archive', 'playlist4-10h', '', isfolder=True)
             addListItem('Create playlist of this week (last 1-7 days)', 'archive', 'playlist1w', '', isfolder=True)
-            addListItem('Create playlist of this week (last 1-7 days) HURRY!', 'archive', 'playlist1wh', '', isfolder=True)
+            addListItem('Create playlist of last 4-10 days', 'archive', 'playlist4-10', '', isfolder=True)
             addListItem('Create playlist of last 2 weeks (last 8-14 days)', 'archive', 'playlist2w', '', isfolder=True)
-            addListItem('Create playlist of last 2 weeks (last 8-14 days) HURRY!', 'archive', 'playlist2wh', '', isfolder=True)
             addListItem('Create playlist of last 3 weeks (last 15-21 days)', 'archive', 'playlist3w', '', isfolder=True)
-            addListItem('Create playlist of last 3 weeks (last 15-21 days) HURRY!', 'archive', 'playlist3wh', '', isfolder=True)
     else:
         addListItem('This week', 'archive', 'thisweek', '', isfolder=True)
         addListItem('Last week', 'archive', 'lastweek', '', isfolder=True)
@@ -79,7 +75,7 @@ def previousSeasonMenu():
         start_date = start_date + timedelta(7)
 
 params = getParams()
-url = urllib.unquote_plus(params.get("url", ""))
+url = unquote_plus(params.get("url", ""))
 mode = params.get("mode", None)
 
 # Save the params in 'vars' to retrieve it in the functions
@@ -115,6 +111,18 @@ elif mode == 'nba_tv_episode_menu':
     TV.episode_menu()
 elif mode == 'nba_tv_play_episode':
     TV.play_episode()
+elif mode == "nba_tv_series":
+    TV.series_Menu()
+elif mode == "nba_tv_seasons":
+    TV.season_Menu()
+elif mode == "nba_tv_episode":
+    TV.episodes_list_Menu()
+elif mode == 'nba_tv_play_serieepisode':
+    TV.play_serieepisode()
+elif mode == 'nba_tv_videolist':
+    TV.nba_tv_videoMenu()
+elif mode == 'nba_tv_videoplay':
+    TV.nba_tv_videoPlay()
 elif mode == "favteam":
     if url == "older":
         favTeamOlderMenu()

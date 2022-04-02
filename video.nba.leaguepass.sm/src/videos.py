@@ -1,9 +1,7 @@
-
-
 import json
 import datetime, time
 from datetime import timedelta
-import urllib, urllib2
+
 import xbmc, xbmcplugin, xbmcgui, xbmcaddon
 from xml.dom.minidom import parseString
 import re
@@ -11,7 +9,14 @@ import re
 from utils import *
 from common import *
 import vars
-
+try:
+    from urllib.parse import unquote_plus
+    from urllib.parse import urlencode
+    import urllib.request  as urllib2
+except ImportError:
+    from urllib import unquote_plus
+    from urllib import urlencode
+    import urllib2
 
 def videoDateMenu():
     video_tag = vars.params.get("video_tag")
@@ -29,126 +34,69 @@ def videoDateMenu():
     xbmcplugin.endOfDirectory(handle=int(sys.argv[1]))
 
 def videoMenu():
-    addListItem('Top Plays', '', 'videodate', '', True, customparams={'video_tag':'top_plays'})
-    addListItem('Shaqtin\' a fool', '', 'videolist', '', True, customparams={
-        'video_tag': 'shaqtin',
-        'video_query': "shaqtin",
-        'pagination': True
-    })
-    addListItem('The starters', '', 'videolist', '', True, customparams={
-        'video_tag': 'starters',
-        'video_query': "starters",
-        'pagination': True
-    })
-    addListItem('Highlights', '', 'videolist', '', True, customparams={
-        'video_tag': 'recap',
-        'pagination': True
-    })
-    addListItem('Smitty\'s top plays under the rim', '', 'videolist', '', True, customparams={
-        'video_query': 'smitty -gametime -inside',
-        'pagination': True
-    })
+    xbmcplugin.setContent(int(sys.argv[1]), 'videos')
+    url = vars.params.get("url", None)
+    if not url:
+        url = "https://content-api-prod.nba.com/public/1/endeavor/layout/watch/landing"
+    json_parser = json.loads(stringify(urllib2.urlopen(url).read()))
+    for category in json_parser['results']['carousels']:
+        if category['type'] == "video_carousel":
+            addListItem(category['title'], '',
+                'videolist', category['value']['videos'][0]['image'], True,
+                customparams={'video_tag':category['value']['slug'], 'pagination': True})
+        elif category['type'] == "collection_cards":
+            for collection in category['value']['items']:
+                addListItem(collection['name'], '',
+                'videolist', collection['image'], True,
+                customparams={'video_tag':collection['slug'], 'pagination': True})
 
 def videoListMenu():
-    date = vars.params.get("date")
+    xbmcplugin.setContent(int(sys.argv[1]), 'videos')
     video_tag = vars.params.get("video_tag")
-    video_query = vars.params.get("video_query")
-    page = int(vars.params.get("page", 0))
-    per_page = 20
+    page = int(vars.params.get("page", 1))
+    per_page = 22
+    log("videoListMenu: tag is %s, page is %d" % (video_tag, page), xbmc.LOGDEBUG)
 
-    if video_query:
-        video_query = urllib.unquote_plus(video_query)
-
-    log("videoListMenu: date requested is %s, tag is %s, query is %s, page is %d" % (date, video_tag, video_query, page), xbmc.LOGDEBUG)
-
-    if date:
-        selected_date = None
-        try:
-            selected_date = datetime.datetime.strptime(date, "%Y-%m-%d")
-        except:
-            selected_date = datetime.datetime.fromtimestamp(time.mktime(time.strptime(date, "%Y-%m-%d")))
-
-    query = []
-    if video_tag:
-        query.append("tags:%s" % video_tag)
-    if video_query:
-        query.append("(%s)" % video_query)
-    query = " OR ".join(query)
-
-    # Add the date if passed from the menu
-    if date:
-        query += " AND releaseDate:[%s TO %s]" % (
-            selected_date.strftime('%Y-%m-%dT00:00:00.000Z'),
-            selected_date.strftime('%Y-%m-%dT23:59:59.000Z')
-        )
-
-    base_url = "https://neulionscnba-a.akamaihd.net/solr/nba_program/usersearch/?"
-    params = urllib.urlencode({
-        "wt": "json",
-        "json.wrf": "updateVideoBoxCallback",
-        "q": query,
+    base_url = "https://content-api-prod.nba.com/public/1/endeavor/video-list/collection/%s?"
+    params = urlencode({
         "sort": "releaseDate desc",
-        "start": page * per_page,
-        "rows": per_page
+        "page": page,
+        "count": per_page
     })
-
-    url = base_url + params
-    log("videoListMenu: %s: url of date is %s" % (video_tag, url), xbmc.LOGDEBUG)
-
-    response = urllib2.urlopen(url).read()
-    response = response[response.find("{"):response.rfind("}")+1]
+    url = base_url%video_tag + params
+    log("videoListMenu: %s: url of tag is %s" % (video_tag, url), xbmc.LOGDEBUG)
+    response = stringify(urllib2.urlopen(url).read())
     log("videoListMenu: response: %s" % response, xbmc.LOGDEBUG)
-
     jsonresponse = json.loads(response)
-
-    for video in jsonresponse['response']['docs']:
-        name = video['name']
-
-        # Parse release date - nba uses different formats :facepalm:
-        date_formats = ["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ"]
-        try:
-            for date_format in date_formats:
-                try:
-                    release_date = datetime.datetime.strptime(video['releaseDate'], date_format)
-                except ValueError:
-                    pass
-        except:
-            for date_format in date_formats:
-                try:
-                    release_date = datetime.datetime.fromtimestamp(
-                        time.mktime(time.strptime(video['releaseDate'], date_format)))
-                except ValueError:
-                    pass
-
-        release_date = release_date.strftime('%d/%m/%Y')
-
-        # Runtime formatting
-        minutes, seconds = divmod(video['runtime'], 60)
-        hours, minutes = divmod(minutes, 60)
-        runtime = "%02d:%02d" % (minutes, seconds)
-
-        if not date:
-            if video['runtime']:
-                name = "%s (%s) - %s" % (name, runtime, release_date)
-            else:
-                name = "%s - %s" % (name, release_date)
-        else:
-            name = "%s (%s)" % (name, runtime)
-
-        addListItem(url=str(video['sequence']), name=name, mode='videoplay', iconimage='')
-
-    if vars.params.get("pagination"):
+    for video in jsonresponse['results']['videos']:
+        name = video['title']
+        thumb = video['image']
+        release_date = video['releaseDate'].split('T')[0]
+        plot = video['description']
+        runtime = video['program']['runtimeHours'].split(':')
+        seconds = int(runtime[-1])
+        minutes = int(runtime[-2])
+        duration = minutes * 60 + seconds
+        if len(runtime) == 3:
+            hours = int(runtime[0])
+            duration = duration + hours * 3600
+        infoList = {
+                "mediatype": "video",
+                "title": name,
+                "duration": duration,
+                "plot": plot,
+                "aired":str(release_date)
+                    }
+        addListItem(url=str(video['program']['id']), name=name, mode='videoplay', iconimage=thumb, infoList=infoList)
+    if vars.params.get("pagination") and page+1 <= jsonresponse['results']['pages']:
         next_page_name = xbmcaddon.Addon().getLocalizedString(50008)
 
         # Add "next page" link
         custom_params = {
             'video_tag': video_tag,
-            'video_query': video_query,
             'page': page + 1,
             'pagination': True
         }
-        if date:
-            custom_params['date'] = date
 
         addListItem(next_page_name, '', 'videolist', '', True, customparams=custom_params)
 
@@ -156,32 +104,31 @@ def videoListMenu():
 
 def videoPlay():
     video_id = vars.params.get("url")
+    if not authenticate():
+        return
 
     url = vars.config['publish_endpoint']
     headers = {
-        'Cookie': vars.cookies,
+        'authorization': 'Bearer %s'%vars.access_token,
         'Content-type': 'application/x-www-form-urlencoded',
         'User-Agent': "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/12.0",
     }
-    body = urllib.urlencode({
+    body = urlencode({
         'id': str(video_id),
-        'bitrate': 800,
+        'format': 'json',
         'type': 'video',
-        'plid': vars.player_id,
-        'isFlex:': 'true',
     })
-
     try:
-        request = urllib2.Request(url, headers=headers)
-        response = urllib2.urlopen(request, body)
+        request = urllib2.Request(url+'?%s'%body, None, headers=headers)
+        response = urllib2.urlopen(request, timeout=30)
         content = response.read()
     except urllib2.HTTPError as e:
         logHttpException(e, url, body)
         littleErrorPopup("Failed to get video url. Please check log for details")
         return ''
 
-    xml = parseString(str(content))
-    video_url = xml.getElementsByTagName("path")[0].childNodes[0].nodeValue
+    json_parser = json.loads(stringify(content))
+    video_url = json_parser['path']
     log("videoPlay: video url is %s" % video_url, xbmc.LOGDEBUG)
 
     # Remove query string

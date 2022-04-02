@@ -1,16 +1,22 @@
-
-
 import json
-import datetime, time, calendar, re, sys, traceback, urllib, urllib2
+import datetime, time, calendar, re, sys, traceback
 from datetime import timedelta
 import xbmc, xbmcplugin, xbmcgui, xbmcaddon
 from xml.dom.minidom import parseString
 import common, utils
 import vars
 
+try:
+    from urllib.parse import quote
+    from urllib.parse import urlencode
+    import urllib.request  as urllib2
+except ImportError:
+    from urllib import quote
+    from urllib import urlencode
+    import urllib2
+
 def get_game(video_id, video_type, video_ishomefeed, start_time, duration):
     utils.log("cookies: %s %s" % (video_type, vars.cookies), xbmc.LOGDEBUG)
-
     # video_type could be archive, live, condensed or oldseason
     if video_type not in ["live", "archive", "condensed"]:
         video_type = "archive"
@@ -69,19 +75,18 @@ def get_game(video_id, video_type, video_ishomefeed, start_time, duration):
     if vars.params.get("camera_number"):
         body['cam'] = vars.params.get("camera_number")
 
-    body = urllib.urlencode(body)
+    body = urlencode(body).encode()
     utils.log("the body of publishpoint request is: %s" % body, xbmc.LOGDEBUG)
-
     try:
         request = urllib2.Request(url, body, headers)
-        response = urllib2.urlopen(request)
+        response = urllib2.urlopen(request, timeout=30)
         content = response.read()
     except urllib2.HTTPError as err:
         utils.logHttpException(err, url)
         utils.littleErrorPopup(xbmcaddon.Addon().getLocalizedString(50020))
         return None
 
-    xml = parseString(str(content))
+    xml = parseString(utils.stringify(content))
     url = xml.getElementsByTagName("path")[0].childNodes[0].nodeValue
     utils.log("response URL from publishpoint: %s" % url, xbmc.LOGDEBUG)
     drm = xml.getElementsByTagName("drmToken")[0].childNodes[0].nodeValue
@@ -100,7 +105,7 @@ def get_game(video_id, video_type, video_ishomefeed, start_time, duration):
             querystring = match.group(4)
 
             livecookies = "nlqptid=%s" % (querystring)
-            livecookiesencoded = urllib.quote(livecookies)
+            livecookiesencoded = quote(livecookies)
 
             utils.log("live cookie: %s %s" % (querystring, livecookies), xbmc.LOGDEBUG)
 
@@ -124,25 +129,25 @@ def getHighlightGameUrl(video_id):
         'User-Agent': "AppleCoreMedia/1.0.0.8C148a (iPad; U; CPU OS 6_2_1 like Mac OS X; en_us)",
     }
 
-    body = urllib.urlencode({
+    body = urlencode({
         'extid': str(video_id),
         'plid': vars.player_id,
         'gt': "64",
         'type': 'game',
         'bitrate': "1600"
-    })
+    }).encode()
 
     utils.log("the body of publishpoint request is: %s" % body, xbmc.LOGDEBUG)
 
     try:
         request = urllib2.Request(url, body, headers)
-        response = urllib2.urlopen(request)
+        response = urllib2.urlopen(request, timeout=30)
         content = response.read()
     except urllib2.HTTPError as ex:
-        utils.log("Highlight url not found. Error: %s - body: %s" % (str(ex), ex.read()), xbmc.LOGERROR)
+        utils.log("Highlight url not found. Error: %s - body: %s" % (str(ex, 'utf8'), ex.read()), xbmc.LOGERROR)
         return ''
 
-    xml = parseString(str(content))
+    xml = parseString(str(content, 'utf8'))
     url = xml.getElementsByTagName("path")[0].childNodes[0].nodeValue
 
     # Remove everything after ? otherwise XBMC fails to read the rtpm stream
@@ -155,15 +160,15 @@ def process_key(dictionary, key, processed_keys):
     processed_keys.add(key)
     return dictionary.get(key)
 
-def addGamesLinks(date='', video_type="archive", playlist=None, in_a_hurry=False):
+def addGamesLinks(date='', video_type="archive", playlist=None):
     try:
         now_datetime_est = utils.nowEST()
         schedule = 'https://nlnbamdnyc-a.akamaihd.net/fs/nba/feeds_s2019/schedule/%04d/%d_%d.js?t=%d' % \
             (date.year, date.month, date.day, time.time())
         utils.log('Requesting %s' % schedule, xbmc.LOGDEBUG)
 
-        schedule_request = urllib2.Request(schedule, None)
-        schedule_response = str(urllib2.urlopen(schedule_request).read())
+        schedule_request = urllib2.Request(schedule)
+        schedule_response = str(urllib2.urlopen(schedule_request, timeout=30).read(), 'utf-8')
         schedule_json = json.loads(schedule_response[schedule_response.find("{"):])
 
         unknown_teams = {}
@@ -296,15 +301,16 @@ def addGamesLinks(date='', video_type="archive", playlist=None, in_a_hurry=False
                         if playlist is None:
                             common.addListItem(name, url="", mode="gamechoosevideo", iconimage=thumbnail_url, isfolder=True, customparams=params)
                         else:
-                            chooseGameVideoMenu(playlist, params, in_a_hurry)
+                            chooseGameVideoMenu(playlist, params)
 
                 remaining_keys = set(game.keys()).difference(processed_keys)
                 utils.log('Remaining keys: {}'.format(remaining_keys), xbmc.LOGDEBUG)
 
         if unknown_teams:
-            utils.log("Unknown teams: %s" % str(unknown_teams), xbmc.LOGWARNING)
+            utils.log("Unknown teams: %s" % str(unknown_teams, 'utf8'), xbmc.LOGWARNING)
 
-    except Exception, e:
+    except Exception as e:
+        raise e
         utils.littleErrorPopup("Error: %s" % str(e))
         utils.log(traceback.format_exc(), xbmc.LOGDEBUG)
         pass
@@ -325,7 +331,7 @@ def play_game():
     if game is not None:
         common.play(game)
 
-def chooseGameVideoMenu(playlist=None, paramsX=None, in_a_hurry=False):
+def chooseGameVideoMenu(playlist=None, paramsX=None):
     if paramsX is None:
         paramsX = vars.params
     video_id = paramsX.get("video_id")
@@ -443,10 +449,10 @@ def chooseGameVideoMenu(playlist=None, paramsX=None, in_a_hurry=False):
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]))
     else:
         #reorder playlist items before adding
-        reorder_streams(streams, game_home_team, game_visitor_team, in_a_hurry)
+        reorder_streams(streams, game_home_team, game_visitor_team)
         for s in streams:
             #trying to add thumbs to playlist item... (can't seem to get it as icon, but it is shown on the right and on the background. However, lost again when saving the playlist.)
-            item = xbmcgui.ListItem(s[1], iconImage=iconimage, thumbnailImage=iconimage)
+            item = xbmcgui.ListItem(s[1])
             try:
                 art_keys = ['thumb', 'poster', 'banner', 'fanart', 'clearart', 'clearlogo', 'landscape', 'icon']
                 art = dict(zip(art_keys, [iconimage for x in art_keys]))
@@ -476,7 +482,7 @@ def get_params(kwargs):
                 res += '&%s=%s'%(k,v)
     return res[1:]
 
-def reorder_streams(streams, home_team, visitor_team, in_a_hurry):
+def reorder_streams(streams, home_team, visitor_team):
     #prefer national TV commentators (ESPN-ABC-TNT) for full game
     has_national_commentators = False
     for i in range(len(streams)):
@@ -485,10 +491,10 @@ def reorder_streams(streams, home_team, visitor_team, in_a_hurry):
             has_national_commentators = True
             break
     #team preferences
-    # 0=always full, 1=full if against 1 otherwise condensed but keep full game if against 2 unless in hurry mode (after condensed), 2=condensed unless against 3/4, 3=highlights, 4=ignore
+    # 0=always full, 1=full if against 1 otherwise condensed but keep full game if against 2 (after condensed), 2=condensed unless against 3/4, 3=highlights, 4=ignore
     #TODO: commentator preferences (if not in list, no preference; if in list, use index as rank) -> store in settings, how???
     #my own personal preferences...
-    commentator_preferences = ["Heat", "Warriors", "Mavericks", "Hawks", "Nuggets"]
+    commentator_preferences = ["Heat", "Warriors", "Mavericks", "Nuggets"]
 
     #0 as default to handle other events (press conferences and such)
     pref_home = vars.team_preferences.get(home_team, 0)
@@ -498,13 +504,13 @@ def reorder_streams(streams, home_team, visitor_team, in_a_hurry):
         for i in range(len(streams)-1, -1, -1):
             del streams[i]
         return
-	if pref_home > 3:
-		pref_home = 3
-	elif pref_visitor > 3:
-		pref_visitor = 3
+        if pref_home > 3:
+            pref_home = 3
+        elif pref_visitor > 3:
+            pref_visitor = 3
     only_highlights = pref_home+pref_visitor > 4
     only_condensed_and_highlights = pref_home == 2 and pref_visitor == 2
-    full_after_condensed = (pref_home == 1 and pref_visitor > 1) or (pref_home > 1 and pref_visitor == 1) or (in_a_hurry and pref_home == 1 and pref_visitor == 1)
+    full_after_condensed = (pref_home == 1 and pref_visitor > 1) or (pref_home > 1 and pref_visitor == 1)
 
     has_condensed = False
     has_highlights = False
@@ -563,7 +569,7 @@ def chooseGameMenu(mode, video_type, date2Use=None):
             date = date2Use
         else:
             date = utils.nowEST()
-            utils.log("current date (america timezone) is %s" % str(date), xbmc.LOGDEBUG)
+            utils.log("current date (america timezone) is %s" % date, xbmc.LOGDEBUG)
 
         # Starts on mondays
         day = date.isoweekday()#2 = tuesday
@@ -571,7 +577,6 @@ def chooseGameMenu(mode, video_type, date2Use=None):
 
         if vars.use_alternative_archive_menu:
             playlist = None
-            in_a_hurry = mode.endswith('h')
             if 'playlist' in mode:
                 playlist = xbmc.PlayList(1)
                 playlist.clear()
@@ -579,10 +584,10 @@ def chooseGameMenu(mode, video_type, date2Use=None):
             if '4-10' in mode:
                 if day <= 5:
                     date = date - timedelta(7)
-                addGamesLinks(date, video_type, playlist, in_a_hurry)
+                addGamesLinks(date, video_type, playlist)
                 if day <= 5 and day > 1:#no need to query empty list when day < 2
                     date = date + timedelta(7)
-                    addGamesLinks(date, video_type, playlist, in_a_hurry)
+                    addGamesLinks(date, video_type, playlist)
             else:
                 #to counter empty list on mondays for 'this week'
                 #playlist.add("", xbmcgui.ListItem(str(date)))
@@ -597,7 +602,7 @@ def chooseGameMenu(mode, video_type, date2Use=None):
 
                 for n in range(nr_weeks, 0, -1):
                     date1 = date - timedelta(7 * (n-1))
-                    addGamesLinks(date1, video_type, playlist, in_a_hurry)
+                    addGamesLinks(date1, video_type, playlist)
         else:
             if mode == "lastweek":
                 date = date - timedelta(7)
@@ -608,6 +613,7 @@ def chooseGameMenu(mode, video_type, date2Use=None):
         # items differently and puts directory first, then file items (home/away feeds
         # require a directory item while only-home-feed games is a file item)
         #xbmcplugin.addSortMethod(handle=int(sys.argv[1]), sortMethod=xbmcplugin.SORT_METHOD_DATE)
-    except:
+    except Exception as ee:
+        raise ee
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=False)
         return None
