@@ -2,9 +2,8 @@
 <addon id="video.nba.leaguepass.sm"
        name="NBA League Pass II"
        version="1.0.5"
-       provider-name="ivankokan, stevmert, maxgalbu, ptsampoukas, robla">
+       provider-name="chamchenko, stevmert, ivankokan, maxgalbu, ptsampoukas, robla">
   <requires>
-    <import addon="xbmc.python" version="2.20.0"/>
     <import addon="script.common.plugin.cache" version="0.9.1"/>
     <import addon="script.module.dateutil" version="2.8.1"/>
     <import addon="script.module.pytz" version="2014.2"/>
